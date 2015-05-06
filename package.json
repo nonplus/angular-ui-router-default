@@ -1,0 +1,19 @@
+{
+  "name": "angular-ui-router-default",
+  "version": "0.0.0",
+  "description": "AngularJS module that adds support for specifying default child views for abstract states when using ui-router.",
+  "main": "angular-ui-router-default.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nonplus/angular-ui-router-default.git"
+  },
+  "author": "Stepan Riha <github@nonplus.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nonplus/angular-ui-router-default/issues"
+  },
+  "homepage": "https://github.com/nonplus/angular-ui-router-default"
+}
