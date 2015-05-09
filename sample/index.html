@@ -14,6 +14,8 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-animate.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.14/angular-ui-router.min.js"></script>
 
+    <script src="../angular-ui-router-default.js"></script>
+
     <!-- app.js declares the uiRouterSample module and adds items to $rootScope, and defines
          the "home" and "about" states
     -->
@@ -45,10 +47,9 @@
         <a class="brand" ui-sref="home">ui-router</a>
         <ul class="nav">
 
-        <!-- Here you can see ui-sref in action again. Also notice the use of $state.includes, which
-             will set the links to 'active' if, for example on the first link, 'contacts' or any of
-             its descendant states are activated. -->
-          <li ng-class="{active: $state.includes('contacts')}"><a ui-sref="contacts.list">Contacts</a></li>
+        <!-- Here you can see ui-sref in action again. The 'contacts state is abstract and will
+             transition to its default child state ('contacts.list'). -->
+          <li ui-sref-active="active"><a ui-sref="contacts">Contacts</a></li>
           <li ui-sref-active="active"><a ui-sref="about">About</a></li>
         </ul>
 

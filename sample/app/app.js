@@ -3,7 +3,8 @@ angular.module('uiRouterSample', [
   'uiRouterSample.contacts',
   'uiRouterSample.contacts.service',
   'uiRouterSample.utils.service',
-  'ui.router', 
+  'ui.router',
+  'ui.router.default',
   'ngAnimate'
 ])
 
