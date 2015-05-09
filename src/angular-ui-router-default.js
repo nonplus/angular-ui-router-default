@@ -1,15 +1,3 @@
-/**
- * AngularJS module that adds support for specifying default child views for abstract states when using ui-router.
- *
- * @link https://github.com/nonplus/angular-ui-router-default
- *
- * @license angular-ui-router-default v0.0.2
- * (c) Copyright Stepan Riha <github@nonplus.net>
- * License MIT
- */
-
-(function(angular) {
-
 "use strict";
 var max_redirects = 10;
 angular.module('ui.router.default', ['ui.router'])
@@ -42,6 +30,3 @@ angular.module('ui.router.default', ['ui.router'])
 			return $delegate;
 		}])
 	}]);
-
-
-})(window.angular);

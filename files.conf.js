@@ -5,7 +5,7 @@ files = {
 	],
 
 	src: [
-		'angular-ui-router-default.js'
+		'src/angular-ui-router-default.js'
 	],
 
 	test: [
