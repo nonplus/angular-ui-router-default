@@ -1,4 +1,4 @@
-// dependencies 
+// dependencies
 var gulp = require('gulp'),
 	git = require('gulp-git'),
 	bump = require('gulp-bump'),
@@ -38,3 +38,46 @@ function inc(importance) {
 gulp.task('patch', function() { return inc('patch'); });
 gulp.task('feature', function() { return inc('minor'); });
 gulp.task('release', function() { return inc('major'); });
+
+var serve = require('gulp-serve');
+
+gulp.task('serve', serve({
+	root: __dirname,
+	port: 8081,
+	middleware: function(req, resp, next) {
+		console.log(req.originalUrl);
+		if(req.originalUrl == '/') {
+			resp.statusCode = 302;
+			resp.setHeader('Location', '/sample/');
+			resp.setHeader('Content-Length', '0');
+			resp.end();
+		} else {
+			next();
+		}
+	}
+}));
+
+var karma = require('gulp-karma');
+var files = require('./files.conf');
+var testFiles = [].concat(files.libs, files.src, files.test);
+
+gulp.task('test', function() {
+	// Be sure to return the stream
+	return gulp.src(testFiles)
+		.pipe(karma({
+			configFile: 'karma.conf.js',
+			action: 'run'
+		}))
+		.on('error', function(err) {
+			// Make sure failed tests cause gulp to exit non-zero
+			throw err;
+		});
+});
+
+gulp.task('watch', function() {
+	gulp.src(testFiles)
+		.pipe(karma({
+			configFile: 'karma.conf.js',
+			action: 'watch'
+		}));
+});
