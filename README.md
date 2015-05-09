@@ -24,13 +24,15 @@ var app = angular.module('myApp', ['ng', 'ui.router.default']);
 Defining Default Child State
 ----------------------------
 
-In you state definition for an abstract state, add a `default` string property with the (relative or absolute) name of a child state.  When a state transtion targets this abstract state, it will be redirected to the default child state instead.
+In your state definition for an abstract state, set the `abstract` property to the name of a child state (relative or absolute).
+The child state name can be provided statically as a string dynamically as a function callback.
+
+When a state transtion targets this abstract state, it will be redirected to the default child state instead.
 
 ```javascript
 $stateProvider
     .state('parent', {
-      abstract: true,
-      default: '.index',
+      abstract: '.index',
       template: '<ui-view/>'
     })
     .state('parent.index', {
@@ -39,6 +41,18 @@ $stateProvider
     .state('parent.page2', {
       ...
     })
+    .state('another', {
+      abstract: ['$rootScope', function($rootScope) {
+        return $rootScope.edit ? '.edit' : '.display';
+      }]
+    })
+    .state('another.display', {
+      ...
+    })
+    .state('another.edit', {
+      ...
+    })
+    )
 ```
 
 Using Default Child State
