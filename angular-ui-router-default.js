@@ -20,7 +20,7 @@ angular.module('ui.router.default', ['ui.router'])
 				var numRedirects = 0;
 				while(numRedirects++ < max_redirects) {
 					var target = this.get(to, this.$current);
-					if(target.abstract && target.abstract !== true) {
+					if(target && target.abstract && target.abstract !== true) {
 						var childState = target.abstract;
 						if(!angular.isString(childState)) {
 							childState = $injector.invoke(childState);
