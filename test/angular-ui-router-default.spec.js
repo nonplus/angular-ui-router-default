@@ -8,6 +8,27 @@ describe('navigating to state', function() {
 		$stateProvider = _$stateProvider_;
 	}));
 
+	describe("with non-existant absolute state", function() {
+		it("should throw an informative error", inject(function($state, $rootScope) {
+			expect(function() {
+				$state.go('somewhere'); $rootScope.$digest();
+			}).toThrowError(/^Could not resolve/);
+		}));
+	})
+
+	describe("with non-existant relative state", function() {
+		beforeEach(module(function($stateProvider) {
+			$stateProvider.state('base', {});
+		}));
+
+		it("should throw an informative error", inject(function($state, $rootScope) {
+			$state.go('base'); $rootScope.$digest();
+			expect(function() {
+				$state.go('.somewhere'); $rootScope.$digest();
+			}).toThrowError(/^Could not resolve/);
+		}));
+	})
+
 	describe("with abstract = false", function() {
 
 		beforeEach(module(function($stateProvider) {
