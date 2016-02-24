@@ -1,5 +1,6 @@
 angular-ui-router-default
 =========================
+[![Build Status](https://travis-ci.org/nonplus/angular-ui-router-default.svg?branch=master)](https://travis-ci.org/nonplus/angular-ui-router-default)
 
 Motivation
 ----------
