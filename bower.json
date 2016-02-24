@@ -1,7 +1,7 @@
 {
   "name": "angular-ui-router-default",
   "main": "angular-ui-router-default.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/nonplus/angular-ui-router-default",
   "authors": [
     "Stepan Riha <github@nonplus.net>"

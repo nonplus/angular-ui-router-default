@@ -3,7 +3,7 @@
  *
  * @link https://github.com/nonplus/angular-ui-router-default
  *
- * @license angular-ui-router-default v0.0.2
+ * @license angular-ui-router-default v0.0.3
  * (c) Copyright Stepan Riha <github@nonplus.net>
  * License MIT
  */
