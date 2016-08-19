@@ -53,7 +53,18 @@ $stateProvider
     .state('another.edit', {
       ...
     })
-    )
+    .state('anotherWithPromise',{
+      abstract: ['$q',function($q){
+        var defer = $q.defer();
+        asyncFunctionThatReturnsPromise().then(function(){
+          defer.resolve('anotherWithPromise.details');
+        });
+        return defer.promise;
+      }]
+    })
+    .state('anotherWithPromise.details',{
+      ...
+    })
 ```
 
 Using Default Child State
