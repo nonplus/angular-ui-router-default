@@ -1,11 +1,12 @@
+/* global angular */
 "use strict";
 var max_redirects = 10;
 angular.module('ui.router.default', ['ui.router'])
-	.config(['$provide', function ($provide) {
-		$provide.decorator('$state', ['$delegate', '$injector', '$q', function ($delegate, $injector, $q) {
+	.config(['$provide', function($provide) {
+		$provide.decorator('$state', ['$delegate', '$injector', '$q', function($delegate, $injector, $q) {
 			var transitionTo = $delegate.transitionTo;
 			var pendingPromise;
-			$delegate.transitionTo = function (to, toParams, options) {
+			$delegate.transitionTo = function(to, toParams, options) {
 				var numRedirects = 0;
 				var $state = this;
 				var nextState = to.name || to;
@@ -20,7 +21,7 @@ angular.module('ui.router.default', ['ui.router'])
 					
 					var absRedirectPromise = getAbstractRedirect(target);
 					pendingPromise = absRedirectPromise;
-					return $q.when(absRedirectPromise,abstractTargetResolved);
+					return $q.when(absRedirectPromise, abstractTargetResolved);
 
 					function abstractTargetResolved(abstractTarget) {
 						if(absRedirectPromise !== pendingPromise) {
@@ -66,5 +67,5 @@ angular.module('ui.router.default', ['ui.router'])
 
 			};
 			return $delegate;
-		}])
+		}]);
 	}]);
