@@ -1,31 +1,69 @@
 "use strict";
 var max_redirects = 10;
 angular.module('ui.router.default', ['ui.router'])
-	.config(['$provide', function($provide) {
-		$provide.decorator('$state', ['$delegate', '$injector', function($delegate, $injector) {
+	.config(['$provide', function ($provide) {
+		$provide.decorator('$state', ['$delegate', '$injector', '$q', function ($delegate, $injector, $q) {
 			var transitionTo = $delegate.transitionTo;
-			$delegate.transitionTo = function(to, toParams, options) {
+			var pendingPromise;
+			$delegate.transitionTo = function (to, toParams, options) {
 				var numRedirects = 0;
-				while(numRedirects++ < max_redirects) {
-					var target = this.get(to, this.$current);
-					if(target && target.abstract && target.abstract !== true) {
-						var childState = target.abstract;
-						if(!angular.isString(childState)) {
-							childState = $injector.invoke(childState);
+				var $state = this;
+				var nextState = to.name || to;
+				var nextParams = toParams;
+				var nextOptions = options;
+
+				return fetchTarget();
+
+				function fetchTarget() {
+					var target = $state.get(nextState, $state.$current);
+					nextState = (target|| {}).name;
+					
+					var absRedirectPromise = getAbstractRedirect(target);
+					pendingPromise = absRedirectPromise;
+					return $q.when(absRedirectPromise,abstractTargetResolved);
+
+					function abstractTargetResolved(abstractTarget) {
+						if(absRedirectPromise !== pendingPromise) {
+							return $q.reject(new Error('transition superseded'));
 						}
-						if(childState[0] == '.') {
-							to += childState;
-						} else {
-							to = childState;
+						// we didn't get anything from the abstract target
+						if (!abstractTarget) {
+							return transitionTo.call($delegate, nextState, nextParams, nextOptions);
 						}
-					} else {
-						break;
+						checkForMaxRedirect();
+						nextState = abstractTarget;
+						return fetchTarget();
+					}
+
+					function checkForMaxRedirect() {
+						if (numRedirects === max_redirects) {
+							throw new Error('Too many abstract state default redirects');
+						}
+						numRedirects += 1;
 					}
 				}
-				if(numRedirects >= max_redirects) {
-					throw new Error("Too many abstract state default redirects");
+				function getAbstractRedirect(state) {
+					if (!state || !state.abstract || state.abstract === true) {
+						return null;
+					}
+					return invokeAbstract(state.abstract).then(abstractInvoked);
+					function abstractInvoked(newState) {
+						if (newState[0] === '.') {
+							return nextState + newState;
+						} else {
+							return newState;
+						}
+					}
+
 				}
-				return transitionTo.call($delegate, to, toParams, options);
+				function invokeAbstract(abstract) {
+					if (!angular.isString(abstract)) {
+						return $q.when($injector.invoke(abstract));
+					} else {
+						return $q.when(abstract);
+					}
+				}
+
 			};
 			return $delegate;
 		}])
