@@ -1,6 +1,6 @@
 {
   "name": "angular-ui-router-default",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "AngularJS module that adds support for specifying default child views for abstract states when using ui-router.",
   "main": "angular-ui-router-default.js",
   "scripts": {
