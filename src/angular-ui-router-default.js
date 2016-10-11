@@ -1,7 +1,12 @@
 /* global angular */
 "use strict";
+var moduleName = 'ui.router.default';
+/* commonjs package manager support (eg componentjs) */
+if (typeof module !== "undefined" && typeof exports !== "undefined" && module.exports === exports){
+	module.exports = moduleName;
+}
 var max_redirects = 10;
-angular.module('ui.router.default', ['ui.router'])
+angular.module(moduleName, ['ui.router'])
 	.config(['$provide', function($provide) {
 		$provide.decorator('$state', ['$delegate', '$injector', '$q', function($delegate, $injector, $q) {
 			var transitionTo = $delegate.transitionTo;
