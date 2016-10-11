@@ -13,7 +13,8 @@ angular.module('uiRouterSample.contacts', [
 
           // By specifying the name of a child state, when the abstract state is activated, it
           // will activate the specified child state instead.
-          abstract: '.list',
+          abstract: true,
+          default: '.list',
 
           // This abstract state will prepend '/contacts' onto the urls of all its children.
           url: '/contacts',

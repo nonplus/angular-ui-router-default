@@ -1,17 +1,25 @@
-/* global angular */
 "use strict";
+
 var moduleName = 'ui.router.default';
+
 /* commonjs package manager support (eg componentjs) */
-if (typeof module !== "undefined" && typeof exports !== "undefined" && module.exports === exports){
+declare var module, exports;
+if (typeof module !== "undefined" && typeof exports !== "undefined" && module.exports === exports) {
 	module.exports = moduleName;
 }
+
 var max_redirects = 10;
 angular.module(moduleName, ['ui.router'])
-	.config(['$provide', function($provide) {
-		$provide.decorator('$state', ['$delegate', '$injector', '$q', function($delegate, $injector, $q) {
+	.config(['$provide', function($provide: ng.auto.IProvideService) {
+
+		$provide.decorator('$state', ['$delegate', '$injector', '$q', function(
+			$delegate: ng.ui.IStateService,
+			$injector: ng.auto.IInjectorService,
+			$q: ng.IQService
+		) {
 			var transitionTo = $delegate.transitionTo;
 			var pendingPromise;
-			$delegate.transitionTo = function(to, toParams, options) {
+			$delegate.transitionTo = function(to, toParams, options): ng.IPromise<any> {
 				var numRedirects = 0;
 				var $state = this;
 				var nextState = to.name || to;
@@ -20,16 +28,17 @@ angular.module(moduleName, ['ui.router'])
 
 				return fetchTarget();
 
-				function fetchTarget() {
+				function fetchTarget(): ng.IPromise<any> {
 					var target = $state.get(nextState, $state.$current);
-					nextState = (target|| {}).name;
-					
+					nextState = (target || {}).name;
+
 					var absRedirectPromise = getAbstractRedirect(target);
 					pendingPromise = absRedirectPromise;
-					return $q.when(absRedirectPromise, abstractTargetResolved);
+					return $q.when(absRedirectPromise)
+						.then(abstractTargetResolved);
 
 					function abstractTargetResolved(abstractTarget) {
-						if(absRedirectPromise !== pendingPromise) {
+						if (absRedirectPromise !== pendingPromise) {
 							return $q.reject(new Error('transition superseded'));
 						}
 						// we didn't get anything from the abstract target
@@ -48,12 +57,14 @@ angular.module(moduleName, ['ui.router'])
 						numRedirects += 1;
 					}
 				}
-				function getAbstractRedirect(state) {
-					if (!state || !state.abstract || state.abstract === true) {
+
+				function getAbstractRedirect(state: ng.ui.IState) {
+					if (!state || !state.abstract || (state.abstract === true && !state.default)) {
 						return null;
 					}
-					return invokeAbstract(state.abstract).then(abstractInvoked);
-					function abstractInvoked(newState) {
+					return invokeAbstract(state).then(abstractInvoked);
+
+					function abstractInvoked(newState): string {
 						if (newState[0] === '.') {
 							return nextState + newState;
 						} else {
@@ -62,15 +73,25 @@ angular.module(moduleName, ['ui.router'])
 					}
 
 				}
-				function invokeAbstract(abstract) {
-					if (!angular.isString(abstract)) {
-						return $q.when($injector.invoke(abstract));
+
+				function invokeAbstract(state: ng.ui.IState) {
+					var defaultState: ng.ui.DefaultSpecifier;
+
+					if (state.default) {
+						defaultState = state.default;
 					} else {
-						return $q.when(abstract);
+						defaultState = state.abstract as any;
+					}
+
+					if (!angular.isString(defaultState)) {
+						return $q.when($injector.invoke(defaultState));
+					} else {
+						return $q.when(defaultState);
 					}
 				}
 
 			};
+
 			return $delegate;
 		}]);
 	}]);

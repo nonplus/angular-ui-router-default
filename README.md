@@ -25,36 +25,39 @@ var app = angular.module('myApp', ['ng', 'ui.router.default']);
 Defining Default Child State
 ----------------------------
 
-In your state definition for an abstract state, set the `abstract` property to the name of a child state (relative or absolute).
-The child state name can be provided statically as a string dynamically as a function callback.
+In your state definition for an abstract state, add a `default` property with the name of a child state (relative or absolute).
+The child state name can be provided statically as a string or dynamically as a function callback.
 
 When a state transtion targets this abstract state, it will be redirected to the default child state instead.
 
 ```javascript
 $stateProvider
     .state('parent', {
-      abstract: '.index',
+      abstract: true,
+      default: '.index',
       template: '<ui-view/>'
     })
     .state('parent.index', {
-      ...
+      // ...
     })
     .state('parent.page2', {
-      ...
+      // ...
     })
     .state('another', {
-      abstract: ['$rootScope', function($rootScope) {
+      abstract: true,
+      default: ['$rootScope', function($rootScope) {
         return $rootScope.edit ? '.edit' : '.display';
       }]
     })
     .state('another.display', {
-      ...
+      // ...
     })
     .state('another.edit', {
-      ...
+      // ...
     })
     .state('anotherWithPromise',{
-      abstract: ['$q',function($q){
+      abstract: true,
+      default: ['$q',function($q){
         var defer = $q.defer();
         asyncFunctionThatReturnsPromise().then(function(){
           defer.resolve('anotherWithPromise.details');
@@ -63,9 +66,25 @@ $stateProvider
       }]
     })
     .state('anotherWithPromise.details',{
-      ...
+      // ...
     })
 ```
+
+#### Older version (< 0.0.5)
+
+Older versions of this module specified the default state by assigning it to the `abstract` property:
+
+```javascript
+$stateProvider
+    .state('parent', {
+      abstract: '.index',
+      template: '<ui-view/>'
+    })
+    // ...
+```
+
+This behavior is still supported, but is **deprecated**, because it causes TypeScript conflicts.  It is recommended
+that the `{ abstract: true, default: '.index' }` format is used instead.
 
 Using Default Child State
 -------------------------
