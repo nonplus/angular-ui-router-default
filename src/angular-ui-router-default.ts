@@ -75,7 +75,7 @@ angular.module(moduleName, ['ui.router'])
 				}
 
 				function invokeAbstract(state: ng.ui.IState) {
-					var defaultState: ng.ui.DefaultSpecifier;
+					var defaultState: ng.ui.StateDefaultSpecifier;
 
 					if (state.default) {
 						defaultState = state.default;
@@ -83,8 +83,8 @@ angular.module(moduleName, ['ui.router'])
 						defaultState = state.abstract as any;
 					}
 
-					if (!angular.isString(defaultState)) {
-						return $q.when($injector.invoke(defaultState));
+					if (defaultState instanceof Function || defaultState instanceof Array) {
+						return $q.when($injector.invoke(defaultState as any));
 					} else {
 						return $q.when(defaultState);
 					}
