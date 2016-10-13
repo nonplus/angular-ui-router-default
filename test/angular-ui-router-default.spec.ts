@@ -56,7 +56,7 @@ describe('navigating to state', function() {
 	}); // with abstract = false
 
 
-	describe("with abstract = true", function() {
+	describe("with abstract = true and no default", function() {
 
 		beforeEach(mock.module(function($stateProvider: ng.ui.IStateProvider) {
 			$stateProvider
@@ -89,13 +89,43 @@ describe('navigating to state', function() {
 			}).toThrowError("Cannot transition to abstract state 'base.abstract'");
 		}));
 
-	}); // with abstract = true
+	}); // with abstract = true and no default
 
 	let members = ["abstract", "default"];
 
 	for (let member of members) {
 
 		describe("abstract with " + member + " =", () => {
+
+			describe("INVALID_STATE", function() {
+				beforeEach(mock.module(function($stateProvider: ng.ui.IStateProvider) {
+					$stateProvider.state('base', {
+						abstract: true,
+						[member]: 'INVALID_STATE'
+					});
+				}));
+
+				it("should throw an informative error", mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService) {
+					expect(function() {
+						$state.go('base'); $rootScope.$digest();
+					}).toThrowError(/^Could not resolve.*INVALID_STATE/);
+				}));
+			}); // invalid
+
+			describe(".INVALID_STATE", function() {
+				beforeEach(mock.module(function($stateProvider: ng.ui.IStateProvider) {
+					$stateProvider.state('base', {
+						abstract: true,
+						[member]: '.INVALID_STATE'
+					});
+				}));
+
+				it("should throw an informative error", mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService) {
+					expect(function() {
+						$state.go('base'); $rootScope.$digest();
+					}).toThrowError(/^Could not resolve.*\.INVALID_STATE/);
+				}));
+			}); // .invalid
 
 			describe("'.child'", function() {
 
@@ -199,7 +229,23 @@ describe('navigating to state', function() {
 					expect($state.current.name).toEqual('base.abstract.child2');
 				}));
 
-			}); // with abstract = function() { return ...; }
+				it("should throw an informative error for INVALID_STATE", mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService) {
+					$state.go('base'); $rootScope.$digest();
+					state = 'INVALID_STATE';
+					expect(function() {
+						$state.go('base.abstract'); $rootScope.$digest();
+					}).toThrowError(/^Could not resolve.*INVALID_STATE/);
+				}));
+
+				it("should throw an informative error for .INVALID_STATE", mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService) {
+					$state.go('base'); $rootScope.$digest();
+					state = '.INVALID_STATE';
+					expect(function() {
+						$state.go('base.abstract'); $rootScope.$digest();
+					}).toThrowError(/^Could not resolve.*\.INVALID_STATE/);
+				}));
+
+			}); // () => state
 
 			describe("['$rootScope', function($rootScope) => $rootScope.state]", function() {
 
@@ -232,6 +278,22 @@ describe('navigating to state', function() {
 					expect($state.current.name).toEqual('base.abstract.child2');
 				}));
 
+				it("should throw an informative error for INVALID_STATE", mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService & StateScope) {
+					$state.go('base'); $rootScope.$digest();
+					$rootScope.state = 'INVALID_STATE';
+					expect(function() {
+						$state.go('base.abstract'); $rootScope.$digest();
+					}).toThrowError(/^Could not resolve.*INVALID_STATE/);
+				}));
+
+				it("should throw an informative error for .INVALID_STATE", mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService & StateScope) {
+					$state.go('base'); $rootScope.$digest();
+					$rootScope.state = '.INVALID_STATE';
+					expect(function() {
+						$state.go('base.abstract'); $rootScope.$digest();
+					}).toThrowError(/^Could not resolve.*\.INVALID_STATE/);
+				}));
+
 			}); // with abstract = ['$rootScope', function($rootScope: ng.IRootScopeService) { return ...; }]
 
 			describe("() => IPromise<string> that resolves", function() {
@@ -241,6 +303,8 @@ describe('navigating to state', function() {
 					$stateProvider
 						.state('base', {
 						})
+						.state('base.child', {
+						})
 						.state('base.abstract', {
 							abstract: true,
 							[member]: ['$q', '$rootScope', function($q: ng.IQService, $rootScope: ng.IRootScopeService) {
@@ -248,11 +312,22 @@ describe('navigating to state', function() {
 								setTimeout(function(){
 									defer.resolve('base.abstract.child');
 									$rootScope.$digest();
-								});
+								}, 5);
 								return defer.promise;
 							}]
 						})
 						.state('base.abstract.child', {
+							abstract: true,
+							[member]: ['$q', '$rootScope', function($q: ng.IQService, $rootScope: ng.IRootScopeService) {
+								var defer = $q.defer();
+								setTimeout(function(){
+									defer.resolve('.grandchild');
+									$rootScope.$digest();
+								}, 5);
+								return defer.promise;
+							}]
+						})
+						.state('base.abstract.child.grandchild', {
 						})
 						.state('base.abstract2', {
 							abstract: true,
@@ -261,7 +336,7 @@ describe('navigating to state', function() {
 								setTimeout(function(){
 									defer.resolve('base.abstract2.child');
 									$rootScope.$digest();
-								});
+								}, 1);
 								return defer.promise;
 							}]
 						})
@@ -273,7 +348,24 @@ describe('navigating to state', function() {
 					mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService) {
 						$state.go('base.abstract')
 							.then(function() {
-								expect($state.current.name).toBe('base.abstract.child');
+								expect($state.current.name).toBe('base.abstract.child.grandchild');
+							})
+							.catch(function() {
+								throw new Error('Should not be here');
+							})
+							.finally(done);
+
+						$rootScope.$digest();
+					});
+				});
+
+				it("should work for relative states", function(done) {
+					mock.inject(function($state: IStateService, $rootScope: ng.IRootScopeService) {
+						$state.go('base.child');
+						$rootScope.$digest();
+						$state.go('^.abstract')
+							.then(function() {
+								expect($state.current.name).toBe('base.abstract.child.grandchild');
 							})
 							.catch(function() {
 								throw new Error('Should not be here');
@@ -336,7 +428,7 @@ describe('navigating to state', function() {
 								setTimeout(function(){
 									defer.reject('This is a rejection');
 									$rootScope.$apply();
-								});
+								}, 5);
 								return defer.promise;
 							}]
 						})

@@ -30,7 +30,13 @@ angular.module(moduleName, ['ui.router'])
 
 				function fetchTarget(): ng.IPromise<any> {
 					var target = $state.get(nextState, $state.$current);
-					nextState = (target || {}).name;
+
+					if (!target) {
+						// default specification is invalid, let ui-router report the problem...
+						return transitionTo.call($delegate, nextState, nextParams, nextOptions);
+					}
+
+					nextState = target.name;
 
 					var absRedirectPromise = getAbstractRedirect(target);
 					pendingPromise = absRedirectPromise;
