@@ -3,7 +3,7 @@
  *
  * @link https://github.com/nonplus/angular-ui-router-default
  *
- * @license angular-ui-router-default v0.0.5
+ * @license angular-ui-router-default v0.0.6
  * (c) Copyright Stepan Riha <github@nonplus.net>
  * License MIT
  */
@@ -30,7 +30,11 @@ angular.module(moduleName, ['ui.router'])
                     return fetchTarget();
                     function fetchTarget() {
                         var target = $state.get(nextState, $state.$current);
-                        nextState = (target || {}).name;
+                        if (!target) {
+                            // default specification is invalid, let ui-router report the problem...
+                            return transitionTo.call($delegate, nextState, nextParams, nextOptions);
+                        }
+                        nextState = target.name;
                         var absRedirectPromise = getAbstractRedirect(target);
                         pendingPromise = absRedirectPromise;
                         return $q.when(absRedirectPromise)
