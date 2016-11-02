@@ -1,6 +1,7 @@
 angular-ui-router-default
 =========================
 [![Build Status](https://travis-ci.org/nonplus/angular-ui-router-default.svg?branch=master)](https://travis-ci.org/nonplus/angular-ui-router-default)
+[![CDNJS](https://img.shields.io/cdnjs/v/angular-ui-router-default.svg)](https://cdnjs.com/libraries/angular-ui-router-default)
 
 Motivation
 ----------
